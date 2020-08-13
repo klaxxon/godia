@@ -28,7 +28,7 @@ This will generate a self.dia file you can open in dia. It places all of the str
 For large projects with packages you do not want (like vendors) simply add a comma delimited line of directories to ignore.<br/>
 <br/>
 <code>
-$> go run *.go -i ./ -o self -ignore vendors,.vscode,ignodrdir
+$> go run *.go -i ./ -o self -ignore vendors,.vscode,ignoredir
 </code>
 <br/>
 <br/>
