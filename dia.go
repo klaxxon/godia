@@ -95,7 +95,7 @@ func sendHeader(f *os.File) {
 				</dia:composite>
 			</dia:attribute>
 		</dia:diagramdata>
-		<dia:layer name="Background" visible="true" connectable="true" active="true">\n`))
+		<dia:layer name="Background" visible="true" connectable="true" active="true">` + "\n"))
 }
 
 func getCurrentData(name string) *Current {
@@ -117,7 +117,7 @@ func getCurrentData(name string) *Current {
 func sendObject(f *os.File, id int, s *Strct) {
 	name := s.Parent.Package + "." + s.Name
 	current := getCurrentData(name)
-	f.Write([]byte(fmt.Sprintf(`			<dia:object type="UML - Class" version="0" id="O%d">
+	f.Write([]byte(fmt.Sprintf(`<dia:object type="UML - Class" version="0" id="O%d">
 	<dia:attribute name="obj_pos">
 		<dia:point val="%s"/>
 	</dia:attribute>
@@ -223,7 +223,7 @@ func sendObject(f *os.File, id int, s *Strct) {
 	<dia:attribute name="comment_font_height">
 		<dia:real val="0.69999999999999996"/>
 	</dia:attribute>
-	<dia:attribute name="attributes">`,
+	<dia:attribute name="attributes">`+"\n",
 		id,
 		current.obj_pos,
 		current.obj_bb,
@@ -265,7 +265,7 @@ func sendObject(f *os.File, id int, s *Strct) {
 			<dia:attribute name="class_scope">
 				<dia:boolean val="false"/>
 			</dia:attribute>
-		</dia:composite>`, a.Name, a.ID, a.Type, a.Comment)))
+		</dia:composite>`+"\n", a.Name, a.ID, a.Type, a.Comment)))
 		}
 	}
 	f.Write([]byte(`</dia:attribute>
@@ -274,12 +274,12 @@ func sendObject(f *os.File, id int, s *Strct) {
 			<dia:boolean val="false"/>
 		</dia:attribute>
 		<dia:attribute name="templates"/>
-	</dia:object>`))
+	</dia:object>` + "\n"))
 }
 
 func sendFooter(f *os.File) {
-	f.Write([]byte(`		</dia:layer>
-	</dia:diagram>`))
+	f.Write([]byte(`</dia:layer>
+	</dia:diagram>` + "\n"))
 }
 
 type Rect struct {
@@ -356,7 +356,7 @@ func sendImplements(f *os.File, id int, from *Strct, frompos int, to *Strct) {
 		<dia:color val="#000000ff"/>
 	</dia:attribute>
 	<dia:attribute name="text_pos">
-		<dia:point val="18.1,9.65"/>
+		<dia:point val="%f,%f"/>
 	</dia:attribute>
 	<dia:attribute name="line_width">
 		<dia:real val="0.10000000000000001"/>
@@ -371,6 +371,13 @@ func sendImplements(f *os.File, id int, from *Strct, frompos int, to *Strct) {
 		<dia:connection handle="0" to="O%d" connection="%d"/>
 		<dia:connection handle="1" to="O%d" connection="3"/>
 	</dia:connections>
-</dia:object>`, id, fx, fy, minx, miny, maxx, maxy, fx, fy, tx, ty, from.ID, frompos, to.ID)))
-	//fmt.Printf("Connection #%d %s O%d.%d ---> %s O%d.3\n", id, from.Name, from.ID, frompos, to.Name, to.ID)
+</dia:object>`, id,
+		fx, fy,
+		minx-0.2, miny-0.2, maxx+0.2, maxy+0.2,
+		fx, fy, tx, ty,
+		(minx+maxx)/2, (miny+maxy)/2,
+		from.ID, frompos, to.ID)))
+	fmt.Printf("Connection #%d %s --> %s\n", id, fmt.Sprintf("%s.%s", from.Parent.Package, from.Name), fmt.Sprintf("%s.%s", to.Parent.Package, to.Name))
+	fmt.Printf("     O%d.%d ---> %s O%d.3\n", from.ID, frompos, to.Name, to.ID)
+	fmt.Printf("     %0.1f,%0.1f -> %0.1f,%0.1f  (%0.1f,%0.1f)-(%0.1f,%0.1f)\n", fx, fy, tx, ty, minx, miny, maxx, maxy)
 }
