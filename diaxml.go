@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/xml"
 	"fmt"
 	"io"
@@ -113,4 +114,10 @@ func parseXML(br io.Reader) {
 		//fmt.Printf("%s = %v\n", name, current)
 		currentData[name] = current
 	}
+}
+
+func escape(in string) string {
+	s := bytes.NewBufferString("")
+	xml.EscapeText(s, []byte(in))
+	return s.String()
 }
