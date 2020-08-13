@@ -372,5 +372,5 @@ func sendImplements(f *os.File, id int, from *Strct, frompos int, to *Strct) {
 		<dia:connection handle="1" to="O%d" connection="3"/>
 	</dia:connections>
 </dia:object>`, id, fx, fy, minx, miny, maxx, maxy, fx, fy, tx, ty, from.ID, frompos, to.ID)))
-	fmt.Printf("Connection #%d %s O%d.%d ---> %s O%d.3\n", id, from.Name, from.ID, frompos, to.Name, to.ID)
+	//fmt.Printf("Connection #%d %s O%d.%d ---> %s O%d.3\n", id, from.Name, from.ID, frompos, to.Name, to.ID)
 }
