@@ -377,7 +377,7 @@ func sendImplements(f *os.File, id int, from *Strct, frompos int, to *Strct) {
 		fx, fy, tx, ty,
 		(minx+maxx)/2, (miny+maxy)/2,
 		from.ID, frompos, to.ID)))
-	fmt.Printf("Connection #%d %s --> %s\n", id, fmt.Sprintf("%s.%s", from.Parent.Package, from.Name), fmt.Sprintf("%s.%s", to.Parent.Package, to.Name))
-	fmt.Printf("     O%d.%d ---> %s O%d.3\n", from.ID, frompos, to.Name, to.ID)
-	fmt.Printf("     %0.1f,%0.1f -> %0.1f,%0.1f  (%0.1f,%0.1f)-(%0.1f,%0.1f)\n", fx, fy, tx, ty, minx, miny, maxx, maxy)
+	//fmt.Printf("Connection #%d %s --> %s\n", id, fmt.Sprintf("%s.%s", from.Parent.Package, from.Name), fmt.Sprintf("%s.%s", to.Parent.Package, to.Name))
+	//fmt.Printf("     O%d.%d ---> %s O%d.3\n", from.ID, frompos, to.Name, to.ID)
+	//fmt.Printf("     %0.1f,%0.1f -> %0.1f,%0.1f  (%0.1f,%0.1f)-(%0.1f,%0.1f)\n", fx, fy, tx, ty, minx, miny, maxx, maxy)
 }
