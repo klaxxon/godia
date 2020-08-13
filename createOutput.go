@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strings"
 )
@@ -37,7 +36,8 @@ type GoFiles struct {
 	Files map[string]*GoStructs
 }
 
-func (g *GoFiles) CreateDia(fn string) {
+func (g *GoFiles) CreateDia(f *os.File) {
+	defer f.Close()
 	// Need to build a package.fieldName map for connections
 	pfn := make(map[string]*Strct)
 	for _, a := range g.Files {
@@ -45,11 +45,6 @@ func (g *GoFiles) CreateDia(fn string) {
 			name := fmt.Sprintf("%s.%s", a.Package, b.Name)
 			pfn[name] = b
 		}
-	}
-
-	f, err := os.OpenFile(fn, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, 0666)
-	if err != nil {
-		log.Fatal(err)
 	}
 
 	sendHeader(f)
