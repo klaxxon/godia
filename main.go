@@ -4,11 +4,38 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"os"
 	"strings"
 )
+
+func copy(src, dst string) error {
+	fstat, err := os.Stat(src)
+	if err != nil {
+		return err
+	}
+
+	if !fstat.Mode().IsRegular() {
+		return fmt.Errorf("%s is not a file", src)
+	}
+
+	source, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	defer source.Close()
+
+	destination, err := os.Create(dst)
+	if err != nil {
+		return err
+	}
+	defer destination.Close()
+
+	_, err = io.Copy(destination, source)
+	return err
+}
 
 func main() {
 	xmlonly := flag.Bool("xml", false, "Uncompressed xml file only")
@@ -50,15 +77,24 @@ func main() {
 		}
 	}
 
-	g.CreateDia(*out + ".xml")
+	f, err := ioutil.TempFile("/tmp", "*.xml")
+	if err != nil {
+		log.Fatal(err)
+	}
+	g.CreateDia(f)
+	fn := f.Name()
 	if !*xmlonly {
-		bdata, err := ioutil.ReadFile(*out + ".xml")
+		bdata, err := ioutil.ReadFile(fn)
 		if err != nil {
 			log.Fatal(err)
 		}
 		CreateGzipFile(*out+".dia", bdata)
 		fmt.Printf("Successfully created %s.dia\n", *out)
 	} else {
+		err = copy(fn, fmt.Sprintf("%s.xml", *out))
+		if err != nil {
+			log.Fatal(err)
+		}
 		fmt.Printf("Successfully created %s.xml\n", *out)
 	}
 	fmt.Printf("Processed %d files, %d structs and %d fields\n", fileCount, structCount, fieldCount)
