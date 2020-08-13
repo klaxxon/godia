@@ -230,9 +230,9 @@ func sendObject(f *os.File, id int, s *Strct) {
 		current.elem_corner,
 		current.elem_width,
 		current.elem_height,
-		s.Name,
-		s.Parent.Package,
-		s.Line,
+		escape(s.Name),
+		escape(s.Parent.Package),
+		escape(s.Line),
 		current.line_color,
 		current.fill_color,
 		current.text_color,
@@ -245,7 +245,7 @@ func sendObject(f *os.File, id int, s *Strct) {
 			}
 			f.Write([]byte(fmt.Sprintf(`<dia:composite type="umlattribute">
 			<dia:attribute name="name">
-				<dia:string>#%s-%d#</dia:string>
+				<dia:string>#%s#</dia:string>
 			</dia:attribute>
 			<dia:attribute name="type">
 				<dia:string>#%s#</dia:string>
@@ -265,7 +265,7 @@ func sendObject(f *os.File, id int, s *Strct) {
 			<dia:attribute name="class_scope">
 				<dia:boolean val="false"/>
 			</dia:attribute>
-		</dia:composite>`+"\n", a.Name, a.ID, a.Type, a.Comment)))
+		</dia:composite>`+"\n", escape(a.Name), escape(a.Type), escape(a.Comment))))
 		}
 	}
 	f.Write([]byte(`</dia:attribute>
