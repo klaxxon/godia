@@ -46,7 +46,7 @@ func (g *GoFiles) process(path string, ignore map[string]bool) {
 	}
 }
 
-var gid int = 1000
+var gid int = 0
 
 func (g *GoStructs) parseGo(fn string) bool {
 	bdata, err := ioutil.ReadFile(fn)
