@@ -30,7 +30,9 @@ For large projects with packages you do not want (like vendors) simply add a com
 <code>
 $> go run *.go self vendors,.vscode,ignodrdir
 </code>
-<b>Issues</b>
+<br/>
+<br/>
+<b>Issues</b><br/>
 Some of the reference lines do not correspond with the correct field. I am still trying to figure this out.</br>
 
 
