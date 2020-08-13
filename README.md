@@ -35,7 +35,9 @@ $> go run *.go -i ./ -o self -ignore vendor,.vscode,ignoredir
 <br/>
 <b>Issues</b><br/>
 Including the vendor directory (4000+ structs!) does create some XML escape issues I have not fixed.</br>
-
+<br/>
+<b>TODO</b><br/>
+Have GoDia take the actial go files and simply find all dependencies.  This is currently a little issue since I still do not firmly grasp the dependency rules for modules within the Go compiler.
 
 
 
