@@ -20,15 +20,15 @@ To simply generate the start of the diagram above....<br/>
 From within the godia directory:<br/>
 <br/>
 <code>
-$> go run *.go ./ self
+$> go run *.go -i ./ -o self
 </code>
 <br/>
 This will generate a self.dia file you can open in dia. It places all of the structs on top of each other so you will need to move then around.  However,  if you save your changes and re-run, it should create a new self.dia but respect the positions you set on the existing structs (hopefully).<br/>
 <br/>
-For large projects with packages you do not want (like vendors) simply add a comma delimited line of directopries to ignore.<br/>
+For large projects with packages you do not want (like vendors) simply add a comma delimited line of directories to ignore.<br/>
 <br/>
 <code>
-$> go run *.go self vendors,.vscode,ignodrdir
+$> go run *.go -i ./ -o self -ignore vendors,.vscode,ignodrdir
 </code>
 <br/>
 <br/>
