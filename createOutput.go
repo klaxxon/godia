@@ -56,6 +56,8 @@ func (g *GoFiles) CreateDia(fn string) {
 	for _, a := range g.Files {
 		for _, b := range a.Strcts {
 			sendObject(f, b.ID, b)
+		}
+		for _, b := range a.Strcts {
 			// Any connections?
 			for _, c := range b.Fields {
 				typ := c.Type
@@ -84,7 +86,8 @@ func (g *GoFiles) CreateDia(fn string) {
 				}
 				name := fmt.Sprintf("%s.%s", pkg, typ)
 				if x, ok := pfn[name]; ok {
-					sendImplements(f, gid, b.ID, c.ID*2+9, x.ID, 3)
+					sendImplements(f, gid, b, c.ID, x)
+					gid++
 				}
 			}
 		}
