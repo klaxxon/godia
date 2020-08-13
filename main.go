@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"flag"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -10,18 +11,24 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 3 {
-		fmt.Println("Usage: godia inputDirectory outputFilename [comma delimited list of directories to ignore]")
-		os.Exit(1)
+	xmlonly := flag.Bool("xml", false, "Uncompressed xml file only")
+	in := flag.String("i", "", "Directory to scan")
+	out := flag.String("o", "", "Output file (will add extension)")
+	ignoreDirs := flag.String("ignore", "", "Comma delimited directories to ignore")
+	flag.Parse()
+
+	if *in == "" {
+		log.Fatal("Must include directory to scan.")
 	}
-	in := os.Args[1]
-	if in[len(in)-1] != '/' {
-		in += "/"
+	if *out == "" {
+		log.Fatal("Must include output filename.")
 	}
-	out := os.Args[2]
+	if (*in)[len(*in)-1] != '/' {
+		*in += "/"
+	}
 	ignore := make(map[string]bool)
-	if len(os.Args) == 4 {
-		c := strings.Split(os.Args[3], ",")
+	if *ignoreDirs != "" {
+		c := strings.Split(*ignoreDirs, ",")
 		for _, a := range c {
 			ignore[strings.TrimSpace(a)] = true
 		}
@@ -31,25 +38,29 @@ func main() {
 	//in := "./"
 	//out := "test"
 	g := GoFiles{Files: make(map[string]*GoStructs)}
-	g.process(in, ignore)
+	g.process(*in, ignore)
 
 	// If the ourput.dia file exists, gunzip to xml so parser can read in positions
-	if f, err := os.Open(out + ".dia"); err == nil {
+	if f, err := os.Open(*out + ".dia"); err == nil {
 		f.Close()
-		dia, err := ReadGzipFile(out + ".dia")
+		dia, err := ReadGzipFile(*out + ".dia")
 		if err == nil {
 			f2 := bytes.NewReader(dia)
 			parseXML(f2)
 		}
 	}
 
-	g.CreateDia(out + ".xml")
-	bdata, err := ioutil.ReadFile(out + ".xml")
-	if err != nil {
-		log.Fatal(err)
+	g.CreateDia(*out + ".xml")
+	if !*xmlonly {
+		bdata, err := ioutil.ReadFile(*out + ".xml")
+		if err != nil {
+			log.Fatal(err)
+		}
+		CreateGzipFile(*out+".dia", bdata)
+		fmt.Printf("Successfully created %s.dia\n", *out)
+	} else {
+		fmt.Printf("Successfully created %s.xml\n", *out)
 	}
-	CreateGzipFile(out+".dia", bdata)
-	fmt.Printf("Successfully created %s.dia\n", out)
 	fmt.Printf("Processed %d files, %d structs and %d fields\n", fileCount, structCount, fieldCount)
 
 }
