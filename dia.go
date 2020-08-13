@@ -2,7 +2,10 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"os"
+	"strconv"
+	"strings"
 )
 
 func sendHeader(f *os.File) {
@@ -92,13 +95,10 @@ func sendHeader(f *os.File) {
 				</dia:composite>
 			</dia:attribute>
 		</dia:diagramdata>
-		<dia:layer name="Background" visible="true" connectable="true" active="true">
-
-`))
+		<dia:layer name="Background" visible="true" connectable="true" active="true">\n`))
 }
 
-func sendObject(f *os.File, id int, s *Strct) {
-	name := s.Parent.Package + "." + s.Name
+func getCurrentData(name string) *Current {
 	current := currentData[name]
 	if current == nil {
 		current = &Current{}
@@ -111,6 +111,12 @@ func sendObject(f *os.File, id int, s *Strct) {
 		current.line_color = "#000000ff"
 		current.text_color = "#000000ff"
 	}
+	return current
+}
+
+func sendObject(f *os.File, id int, s *Strct) {
+	name := s.Parent.Package + "." + s.Name
+	current := getCurrentData(name)
 	f.Write([]byte(fmt.Sprintf(`			<dia:object type="UML - Class" version="0" id="O%d">
 	<dia:attribute name="obj_pos">
 		<dia:point val="%s"/>
@@ -231,10 +237,15 @@ func sendObject(f *os.File, id int, s *Strct) {
 		current.fill_color,
 		current.text_color,
 	)))
-	for _, a := range s.Fields {
-		f.Write([]byte(fmt.Sprintf(`<dia:composite type="umlattribute">
+	// Bad sorting
+	for x := 0; x < len(s.Fields); x++ {
+		for _, a := range s.Fields {
+			if a.ID != x {
+				continue
+			}
+			f.Write([]byte(fmt.Sprintf(`<dia:composite type="umlattribute">
 			<dia:attribute name="name">
-				<dia:string>#%s#</dia:string>
+				<dia:string>#%s-%d#</dia:string>
 			</dia:attribute>
 			<dia:attribute name="type">
 				<dia:string>#%s#</dia:string>
@@ -254,7 +265,8 @@ func sendObject(f *os.File, id int, s *Strct) {
 			<dia:attribute name="class_scope">
 				<dia:boolean val="false"/>
 			</dia:attribute>
-		</dia:composite>`, a.Name, a.Type, a.Comment)))
+		</dia:composite>`, a.Name, a.ID, a.Type, a.Comment)))
+		}
 	}
 	f.Write([]byte(`</dia:attribute>
 		<dia:attribute name="operations"/>
@@ -270,20 +282,66 @@ func sendFooter(f *os.File) {
 	</dia:diagram>`))
 }
 
-func sendImplements(f *os.File, id, from, frompos, to, topos int) {
+type Rect struct {
+	x1 float64
+	y1 float64
+	x2 float64
+	y2 float64
+}
+
+func parsePair(s string) (float64, float64) {
+	comma := strings.Index(s, ",")
+	x, err := strconv.ParseFloat(s[:comma], 64)
+	if err != nil {
+		fmt.Println(err)
+		return 0, 0
+	}
+	y, err := strconv.ParseFloat(s[comma+1:], 64)
+	if err != nil {
+		fmt.Println(err)
+		return 0, 0
+	}
+	return x, y
+}
+
+func getBoundingBoxFloat(s string) Rect {
+	semi := strings.Index(s, ";")
+	x1, y1 := parsePair(s[:semi])
+	x2, y2 := parsePair(s[semi+1:])
+	return Rect{x1: x1, y1: y1, x2: x2, y2: y2}
+}
+
+func sendImplements(f *os.File, id int, from *Strct, frompos int, to *Strct) {
+	var fx, fy, tx, ty float64
+
+	fpos := getCurrentData(fmt.Sprintf("%s.%s", from.Parent.Package, from.Name))
+	tpos := getCurrentData(fmt.Sprintf("%s.%s", to.Parent.Package, to.Name))
+	frect := getBoundingBoxFloat(fpos.obj_bb)
+	trect := getBoundingBoxFloat(tpos.obj_bb)
+	fx = frect.x2
+	fy = frect.y1 + 2.7 + float64(frompos)*0.8
+	tx = trect.x1
+	ty = trect.y1 + 1.2
+	frompos = frompos*2 + 9
+
+	minx := math.Min(fx, tx)
+	maxx := math.Max(fx, tx)
+	miny := math.Min(fy, ty)
+	maxy := math.Max(fy, ty)
+
 	f.Write([]byte(fmt.Sprintf(`    <dia:object type="UML - Implements" version="0" id="O%d">
 	<dia:attribute name="obj_pos">
-		<dia:point val="9.255,11.65"/>
+		<dia:point val="%f,%f"/>
 	</dia:attribute>
 	<dia:attribute name="obj_bb">
-		<dia:rectangle val="9.19547,9.24855;18.5343,11.7095"/>
+		<dia:rectangle val="%f,%f;%f,%f"/>
 	</dia:attribute>
 	<dia:attribute name="meta">
 		<dia:composite type="dict"/>
 	</dia:attribute>
 	<dia:attribute name="conn_endpoints">
-		<dia:point val="9.255,11.65"/>
-		<dia:point val="18.4,9.65"/>
+		<dia:point val="%f,%f"/>
+		<dia:point val="%f,%f"/>
 	</dia:attribute>
 	<dia:attribute name="text">
 		<dia:string>##</dia:string>
@@ -311,7 +369,8 @@ func sendImplements(f *os.File, id, from, frompos, to, topos int) {
 	</dia:attribute>
 	<dia:connections>
 		<dia:connection handle="0" to="O%d" connection="%d"/>
-		<dia:connection handle="1" to="O%d" connection="%d"/>
+		<dia:connection handle="1" to="O%d" connection="3"/>
 	</dia:connections>
-</dia:object>`, id, from, frompos, to, topos)))
+</dia:object>`, id, fx, fy, minx, miny, maxx, maxy, fx, fy, tx, ty, from.ID, frompos, to.ID)))
+	fmt.Printf("Connection #%d %s O%d.%d ---> %s O%d.3\n", id, from.Name, from.ID, frompos, to.Name, to.ID)
 }
