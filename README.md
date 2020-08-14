@@ -6,16 +6,19 @@ GoDia is a simple go program that takes golang files and produces a .dia diagram
 <br/>
 This has some bugs and is a work in progress. It has been working for some large Go projects, but has issues if I include vendor directories.<br/>
 <br/>
-<b>Features:</b>
+
+# Features:
 <ul>
   <li>Uses DIAs UML diagram</li>
   <li>Uses "implements" connections between the field and associated struct type</li>
   <li>The "stereotype" is set to the package name</li>
   <li>All fields and their types are shown</li>
+  <li>C++ comments on the filed lines are included</li>
   <li>If the .dia file already exists when this is run, it will attempt to keep the position, color and size the same.</li>
 </ul>
 <br/>
-<B>Running</b>
+
+# Running
 <br/>
 To simply generate the start of the diagram above....<br/>
 From within the godia directory:<br/>
@@ -33,10 +36,12 @@ $> go run *.go -i ./ -o self -ignore vendor,.vscode,ignoredir
 </code>
 <br/>
 <br/>
-<b>Issues</b><br/>
-Including the vendor directory (4000+ structs!) does create some XML escape issues I have not fixed.</br>
+
+# Issues
+Including one of my vendor directories (4000+ structs!) does create some parsing issues I have not fixed.</br>
 <br/>
-<b>TODO</b><br/>
+
+# TODO
 <ul>
   <li>Have GoDia take the actial go files and simply find all dependencies.  This is currently a little issue since I still do not firmly grasp the dependency rules for modules within the Go compiler.</li>
   <li>Add optional receiver methods</li>
